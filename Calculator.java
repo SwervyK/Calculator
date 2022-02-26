@@ -2,10 +2,13 @@ import java.io.File;
 import java.util.Scanner;
 
 public class Calculator {
+                          // 379.39 seconds boot
+                          // 1002001 Files 1003002 Folders
+                          // 454.88 seconds shutdown
     
-    static int size = 101;
-    static int numBootThreads = 101; // Best so far 16
-    static int numDeleteThreads = 101;
+    static int size = 1001;
+    static int numBootThreads = 1001; // Best so far 16
+    static int numDeleteThreads = 1001;
     static File numberFolder = new File("Numbers");
     public static void main(String[] args) throws Exception {
         // Bootup
