@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class Calculator {
                           // 379.39 seconds boot
-                          // 1002001 Files 1003002 Folders
+                          // 1001000 Files 1002000 Folders
                           // 454.88 seconds shutdown
     
     static int size = 1001; // max number - 1
@@ -26,17 +26,17 @@ public class Calculator {
         }
         while ((first = scanner.nextInt()) > (size-1));
         
-        // // Second input
-        // int second;
-        // do {
-        //     System.out.println("Input Number beetween 0-" + (size-1));
-        // }
-        // while ((second = scanner.nextInt()) > (size-1));
+        // Second input
+        int second;
+        do {
+            System.out.println("Input Number between 0-" + (size-1));
+        }
+        while ((second = scanner.nextInt()) > (size-1));
         
-        // // Get answer
-        // File numberFile = new File(numberFolder, first + "\\" + second);
-        // System.out.println("Your answer is: " + numberFile.list()[0]);
-        // scanner.close();
+        // Get answer
+        File numberFile = new File(numberFolder, first + "\\" + second);
+        System.out.println("Your answer is: " + numberFile.list()[0]);
+        scanner.close();
         
         // Delete everything
         long shutdownStart = System.nanoTime();
@@ -63,7 +63,7 @@ public class Calculator {
     public static void deleteNumbers(int numThreads) throws Exception {
         int colPerThread = size/numThreads;
         DeleteThread[] threads = new DeleteThread[numThreads];
-        for (int i = 0; i < numThreads; i++) {
+        for (int i = 0; i < numThreads-1; i++) {
             threads[i] = new DeleteThread((colPerThread * i), (colPerThread * (i + 1)), size);
             threads[i].start();
         }
