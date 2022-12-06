@@ -6,9 +6,9 @@ public class Calculator {
                           // 1002001 Files 1003002 Folders
                           // 454.88 seconds shutdown
     
-    static int size = 1001;
-    static int numBootThreads = 1001; // Best so far 16
-    static int numDeleteThreads = 1001;
+    static int size = 1001; // max number - 1
+    static int numBootThreads = size/4; // Best so far 16
+    static int numDeleteThreads = size/4;
     static File numberFolder = new File("Numbers");
     public static void main(String[] args) throws Exception {
         // Bootup
@@ -22,25 +22,25 @@ public class Calculator {
         Scanner scanner = new Scanner(System.in);
         int first;
         do {
-            System.out.println("Input Number beetween 0-" + (size-1));
+            System.out.println("Input Number between 0-" + (size-1));
         }
         while ((first = scanner.nextInt()) > (size-1));
         
-        // Second input
-        int second;
-        do {
-            System.out.println("Input Number beetween 0-" + (size-1));
-        }
-        while ((second = scanner.nextInt()) > (size-1));
+        // // Second input
+        // int second;
+        // do {
+        //     System.out.println("Input Number beetween 0-" + (size-1));
+        // }
+        // while ((second = scanner.nextInt()) > (size-1));
         
-        // Get answer
-        File numberFile = new File(numberFolder, first + "\\" + second);
-        System.out.println("Your answer is: " + numberFile.list()[0]);
-        scanner.close();
+        // // Get answer
+        // File numberFile = new File(numberFolder, first + "\\" + second);
+        // System.out.println("Your answer is: " + numberFile.list()[0]);
+        // scanner.close();
         
         // Delete everything
         long shutdownStart = System.nanoTime();
-        deleteFiles(numDeleteThreads);
+        deleteNumbers(numDeleteThreads);
         long shutdownEnd = System.nanoTime();
         System.out.println("Shutdown time was: " + (double)(shutdownEnd - shutdownStart)/1_000_000_000 + " seconds");
         
@@ -49,30 +49,26 @@ public class Calculator {
     private static void calculateNumbers(int numThreads) throws Exception {        
         int colPerThread = size/numThreads;
         CalcThread[] threads = new CalcThread[numThreads];
-        threads[0] = new CalcThread(0, colPerThread + 1, size);
-        threads[0].start();
-        for (int i = 1; i < numThreads-1; i++) {
+        for (int i = 0; i < numThreads-1; i++) {
             threads[i] = new CalcThread((colPerThread * i), (colPerThread * (i + 1)), size);
             threads[i].start();
         }
-        threads[numThreads-1] = new CalcThread(size - colPerThread - 1, size, size);
-        threads[numThreads-1].start();
+        threads[threads.length-1] = new CalcThread(size - colPerThread, size, size);
+        threads[threads.length-1].start();
         for (int i = 0; i < numThreads; i++) {
             threads[i].join();
         }
     }
     
-    public static void deleteFiles(int numThreads) throws Exception {
+    public static void deleteNumbers(int numThreads) throws Exception {
         int colPerThread = size/numThreads;
         DeleteThread[] threads = new DeleteThread[numThreads];
-        threads[0] = new DeleteThread(0, colPerThread + 1, size);
-        threads[0].start();
-        for (int i = 1; i < numThreads-1; i++) {
+        for (int i = 0; i < numThreads; i++) {
             threads[i] = new DeleteThread((colPerThread * i), (colPerThread * (i + 1)), size);
             threads[i].start();
         }
-        threads[numThreads-1] = new DeleteThread(size - colPerThread - 1, size, size);
-        threads[numThreads-1].start();
+        threads[threads.length-1] = new DeleteThread(size - colPerThread, size, size);
+        threads[threads.length-1].start();
         for (int i = 0; i < numThreads; i++) {
             threads[i].join();
         }
