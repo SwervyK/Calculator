@@ -6,15 +6,14 @@ public class Calculator {
                           // 1001000 Files 1002000 Folders
                           // 454.88 seconds shutdown
     
-    static int size = 1001; // max number - 1
-    static int numBootThreads = size/4; // Best so far 16
-    static int numDeleteThreads = size/4;
+    static int maxNum = 1001; // You can add numbers from 0 to max number - 1
+    static int numThreads = maxNum/4;
     static File numberFolder = new File("Numbers");
     public static void main(String[] args) throws Exception {
         // Bootup
         numberFolder.mkdir();
         long bootupStart = System.nanoTime();
-        calculateNumbers(numBootThreads);
+        calculateNumbers(numThreads);
         long bootupEnd = System.nanoTime();
         System.out.println("Bootup time was: " + (double)(bootupEnd - bootupStart)/1_000_000_000 + " seconds");
         
@@ -22,16 +21,16 @@ public class Calculator {
         Scanner scanner = new Scanner(System.in);
         int first;
         do {
-            System.out.println("Input Number between 0-" + (size-1));
+            System.out.println("Input Number between 0-" + (maxNum-1));
         }
-        while ((first = scanner.nextInt()) > (size-1));
+        while ((first = scanner.nextInt()) > (maxNum-1));
         
         // Second input
         int second;
         do {
-            System.out.println("Input Number between 0-" + (size-1));
+            System.out.println("Input Number between 0-" + (maxNum-1));
         }
-        while ((second = scanner.nextInt()) > (size-1));
+        while ((second = scanner.nextInt()) > (maxNum-1));
         
         // Get answer
         File numberFile = new File(numberFolder, first + "\\" + second);
@@ -40,20 +39,20 @@ public class Calculator {
         
         // Delete everything
         long shutdownStart = System.nanoTime();
-        deleteNumbers(numDeleteThreads);
+        deleteNumbers(numThreads);
         long shutdownEnd = System.nanoTime();
         System.out.println("Shutdown time was: " + (double)(shutdownEnd - shutdownStart)/1_000_000_000 + " seconds");
         
     }
     
     private static void calculateNumbers(int numThreads) throws Exception {        
-        int colPerThread = size/numThreads;
+        int rowPerThread = maxNum/numThreads;
         CalcThread[] threads = new CalcThread[numThreads];
         for (int i = 0; i < numThreads-1; i++) {
-            threads[i] = new CalcThread((colPerThread * i), (colPerThread * (i + 1)), size);
+            threads[i] = new CalcThread((rowPerThread * i), (rowPerThread * (i + 1)), maxNum);
             threads[i].start();
         }
-        threads[threads.length-1] = new CalcThread(size - colPerThread, size, size);
+        threads[threads.length-1] = new CalcThread(maxNum - rowPerThread, maxNum, maxNum);
         threads[threads.length-1].start();
         for (int i = 0; i < numThreads; i++) {
             threads[i].join();
@@ -61,13 +60,13 @@ public class Calculator {
     }
     
     public static void deleteNumbers(int numThreads) throws Exception {
-        int colPerThread = size/numThreads;
+        int rowPerThread = maxNum/numThreads;
         DeleteThread[] threads = new DeleteThread[numThreads];
         for (int i = 0; i < numThreads-1; i++) {
-            threads[i] = new DeleteThread((colPerThread * i), (colPerThread * (i + 1)), size);
+            threads[i] = new DeleteThread((rowPerThread * i), (rowPerThread * (i + 1)), maxNum);
             threads[i].start();
         }
-        threads[threads.length-1] = new DeleteThread(size - colPerThread, size, size);
+        threads[threads.length-1] = new DeleteThread(maxNum - rowPerThread, maxNum, maxNum);
         threads[threads.length-1].start();
         for (int i = 0; i < numThreads; i++) {
             threads[i].join();
@@ -77,21 +76,21 @@ public class Calculator {
     
     public static class CalcThread extends Thread {
         
-        private int startCol;
-        private int endCol;
-        private int numRow;
+        private int startRow;
+        private int endRow;
+        private int numColumns;
         
-        public CalcThread(int startCol, int endCol, int numRow) {
-            this.startCol = startCol;
-            this.endCol = endCol;
-            this.numRow = numRow;
+        public CalcThread(int startRow, int endRow, int numColumns) {
+            this.startRow = startRow;
+            this.endRow = endRow;
+            this.numColumns = numColumns;
         }
         
         public void run() {
             try {
-                for (int i = startCol; i < endCol; i++) {
+                for (int i = startRow; i < endRow; i++) {
                     new File("Numbers" + "\\" + i).mkdir();
-                    for (int j = 0; j < numRow; j++) {
+                    for (int j = 0; j < numColumns; j++) {
                         new File("Numbers" + "\\" + i + "\\" + j).mkdir();
                         new File("Numbers" + "\\" + i + "\\" + j + "\\" + (i + j)).createNewFile();
                     }
@@ -102,20 +101,20 @@ public class Calculator {
     
     public static class DeleteThread extends Thread {
         
-        private int startCol;
-        private int endCol;
-        private int numRow;
+        private int startRow;
+        private int endRow;
+        private int numColumns;
         
-        public DeleteThread(int startCol, int endCol, int numRow) {
-            this.startCol = startCol;
-            this.endCol = endCol;
-            this.numRow = numRow;
+        public DeleteThread(int startRow, int endRow, int numColumns) {
+            this.startRow = startRow;
+            this.endRow = endRow;
+            this.numColumns = numColumns;
         }
         
         public void run() {
             try {
-                for (int i = startCol; i < endCol; i++) {
-                    for (int j = 0; j < numRow; j++) {
+                for (int i = startRow; i < endRow; i++) {
+                    for (int j = 0; j < numColumns; j++) {
                         new File("Numbers\\" + i + "\\" + j + "\\" + (i+j)).delete();
                         new File("Numbers\\" + i + "\\" + j).delete();
                     }
